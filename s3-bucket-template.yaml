@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template to create two S3 buckets.
+Description: CloudFormation template to create two S3 buckets accessible only by root user.
 
 Parameters:
   BucketName1:
@@ -17,6 +17,27 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
+  S3BucketOnePolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketOne
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "arn:aws:s3:::${BucketName1}"
+              - !Sub "arn:aws:s3:::${BucketName1}/*"
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "s3:*"
+            Resource:
+              - !Sub "arn:aws:s3:::${BucketName1}"
+              - !Sub "arn:aws:s3:::${BucketName1}/*"
+
   S3BucketTwo:
     Type: AWS::S3::Bucket
     Properties:
@@ -24,11 +45,21 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
-Outputs:
-  FirstBucket:
-    Description: First S3 Bucket Name
-    Value: !Ref S3BucketOne
-
-  SecondBucket:
-    Description: Second S3 Bucket Name
-    Value: !Ref S3BucketTwo
+  S3BucketTwoPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketTwo
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "arn:aws:s3:::${BucketName2}"
+              - !Sub "arn:aws:s3:::${BucketName2}/*"
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "s3:*"
+           
