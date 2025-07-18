@@ -1,20 +1,34 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template to create a free S3 bucket.
+Description: CloudFormation template to create two S3 buckets.
+
+Parameters:
+  BucketName1:
+    Type: String
+    Description: Name for the first S3 bucket
+  BucketName2:
+    Type: String
+    Description: Name for the second S3 bucket
 
 Resources:
-  MyFreeS3Bucket:
+  S3BucketOne:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'akhil-free-bucket-${AWS::AccountId}-${AWS::Region}'
+      BucketName: !Ref BucketName1
       VersioningConfiguration:
-        Status: Suspended
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+        Status: Enabled
+
+  S3BucketTwo:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName2
+      VersioningConfiguration:
+        Status: Enabled
 
 Outputs:
-  BucketName:
-    Value: !Ref MyFreeS3Bucket
-    Description: Name of the S3 bucket created.
+  FirstBucket:
+    Description: First S3 Bucket Name
+    Value: !Ref S3BucketOne
+
+  SecondBucket:
+    Description: Second S3 Bucket Name
+    Value: !Ref S3BucketTwo
