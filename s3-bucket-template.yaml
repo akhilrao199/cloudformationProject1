@@ -1,65 +1,65 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template to create two S3 buckets accessible only by root user.
+Description: CloudFormation template to create two S3 buckets with IAM policy allowing access only to the root user
 
 Parameters:
   BucketName1:
     Type: String
-    Description: Name for the first S3 bucket
+    Description: First S3 bucket name
   BucketName2:
     Type: String
-    Description: Name for the second S3 bucket
+    Description: Second S3 bucket name
 
 Resources:
-  S3BucketOne:
+  FirstS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref BucketName1
-      VersioningConfiguration:
-        Status: Enabled
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
 
-  S3BucketOnePolicy:
+  SecondS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName2
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref S3BucketOne
+      Bucket: !Ref FirstS3Bucket
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-          - Effect: Deny
+          - Effect: "Deny"
             Principal: "*"
             Action: "s3:*"
             Resource:
               - !Sub "arn:aws:s3:::${BucketName1}"
               - !Sub "arn:aws:s3:::${BucketName1}/*"
-          - Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action: "s3:*"
-            Resource:
-              - !Sub "arn:aws:s3:::${BucketName1}"
-              - !Sub "arn:aws:s3:::${BucketName1}/*"
+            Condition:
+              StringNotEquals:
+                "aws:PrincipalArn": !Sub "arn:aws:iam::${AWS::AccountId}:root"
 
-  S3BucketTwo:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref BucketName2
-      VersioningConfiguration:
-        Status: Enabled
-
-  S3BucketTwoPolicy:
+  S3BucketPolicy2:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref S3BucketTwo
+      Bucket: !Ref SecondS3Bucket
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-          - Effect: Deny
+          - Effect: "Deny"
             Principal: "*"
             Action: "s3:*"
             Resource:
               - !Sub "arn:aws:s3:::${BucketName2}"
               - !Sub "arn:aws:s3:::${BucketName2}/*"
-          - Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action: "s3:*"
-           
+            Condition:
+              StringNotEquals:
+                "aws:PrincipalArn": !Sub "arn:aws:iam::${AWS::AccountId}:root"
