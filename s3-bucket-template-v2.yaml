@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create two S3 buckets with access policies
+
+Resources:
+  FirstBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: akhil-free-bucket-834153250791-ap-south-1
+
+  SecondBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: akhil-bucket-two
+
+  FirstBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FirstBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub "${FirstBucket.Arn}/*"
+
+  SecondBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SecondBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub "${SecondBucket.Arn}/*"
