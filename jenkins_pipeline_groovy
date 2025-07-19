@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = 'ap-south-1'
+        STACK_NAME = 'free-s3-stack'
+        TEMPLATE_FILE = 's3-bucket-template.yaml'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/akhilrao199/cloudformationProject1.git'
+            }
+        }
+
+        stage('Deploy CloudFormation Stack') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'aws-cred',
+                    usernameVariable: 'AWS_ACCESS_KEY_ID',
+                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                )]) {
+                    sh '''
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+
+                        aws cloudformation deploy \
+                          --template-file $TEMPLATE_FILE \
+                          --stack-name $STACK_NAME \
+                          --region $AWS_REGION \
+                          --capabilities CAPABILITY_NAMED_IAM
+
+                        echo "CloudFormation stack '$STACK_NAME' deployed successfully."
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Deployment failed. Please check the CloudFormation template or credentials.'
+        }
+    }
+}
