@@ -1,65 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template to create two S3 buckets with IAM policy allowing access only to the root user
-
-Parameters:
-  BucketName1:
-    Type: String
-    Description: First S3 bucket name
-  BucketName2:
-    Type: String
-    Description: Second S3 bucket name
+Description: CloudFormation template to create a versioned S3 bucket
 
 Resources:
-  FirstS3Bucket:
+  FreeS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref BucketName1
-      AccessControl: Private
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
+      BucketName: akhil-free-bucket-834153250791-ap-south-1
+      VersioningConfiguration:
+        Status: Enabled
 
-  SecondS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref BucketName2
-      AccessControl: Private
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-
-  S3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref FirstS3Bucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Deny"
-            Principal: "*"
-            Action: "s3:*"
-            Resource:
-              - !Sub "arn:aws:s3:::${BucketName1}"
-              - !Sub "arn:aws:s3:::${BucketName1}/*"
-            Condition:
-              StringNotEquals:
-                "aws:PrincipalArn": !Sub "arn:aws:iam::${AWS::AccountId}:root"
-
-  S3BucketPolicy2:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref SecondS3Bucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Deny"
-            Principal: "*"
-            Action: "s3:*"
-            Resource:
-              - !Sub "arn:aws:s3:::${BucketName2}"
-              - !Sub "arn:aws:s3:::${BucketName2}/*"
-            Condition:
-              StringNotEquals:
-                "aws:PrincipalArn": !Sub "arn:aws:iam::${AWS::AccountId}:root"
+Outputs:
+  BucketName:
+    Value: !Ref FreeS3Bucket
+    Description: Name of the created S3 bucket
